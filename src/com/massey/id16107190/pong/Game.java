@@ -16,14 +16,17 @@ public class Game extends GameEngine {
 	private boolean newGame = true;
 	// GameObjects
 	// Player controls etc
-	private PlayerController pc = new PlayerController();
+	private PlayerController pc = PlayerController.getInstance();
+	private LevelController lc = LevelController.getInstance();
+	private PaintEngine paint = PaintEngine.getInstance();
+	private CollisionHandler ch = CollisionHandler.getInstance();
 	public void init() {
 		// Initialize Window Size
 		setWindowSize(cs.getResX(), cs.getResY());	
+		lc.setWorldY(cs.getResY() - lc.getGridSize());
 	}
 
 	public static void start() {
-		
 	}
 	
 	public static void quit() {
@@ -45,7 +48,10 @@ public class Game extends GameEngine {
 			titleSet = true;
 			mFrame.setTitle("Pong!");		
 		}
-		pc.Update();
+		pc.Update(dt);
+		double[] gridPos = lc.getPlayerGridPosition(pc.getPlayer().getHitbox().getRadius());
+		//System.out.println(gridPos[0] + " : " + gridPos[1]);
+		ch.getPlayerCollisions();
 	}
 
 	public void paintComponent() {
@@ -53,9 +59,8 @@ public class Game extends GameEngine {
 		changeBackgroundColor(black);
 		clearBackground(cs.getResX(), cs.getResY());
 		
-		changeColor(red);
-		Integer[] coords = pc.getPlayerCoords();
-		drawSolidRectangle(coords[0], coords[1], 50, 50);
+		paint.PaintLevel(this);
+		paint.PaintHitBoxes(this);
 	}
 	
 	public void keyPressed(KeyEvent event) {

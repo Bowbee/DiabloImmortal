@@ -2,9 +2,26 @@ package com.massey.id16107190.pong;
 
 import java.awt.event.KeyEvent;
 
-public class PlayerController {
+
+public final class PlayerController{
+	 
+    private static PlayerController INSTANCE;
+    
+    private PlayerController() {  
+    	
+    }
+     
+    public static PlayerController getInstance() {
+        if(INSTANCE == null) {
+            INSTANCE = new PlayerController();
+        }
+         
+        return INSTANCE;
+    }
 	
 	private ClientSettings cs = ClientSettings.getInstance();
+	private LevelController lc = LevelController.getInstance();
+	private Player player = new Player();
 	private int playerMoveY = 0;
 	private int playerMoveX = 0;
 	private boolean kbPressedUP = false;
@@ -12,24 +29,88 @@ public class PlayerController {
 	private boolean kbPressedLEFT = false;
 	private boolean kbPressedRIGHT = false;
 	
+	private boolean collideLEFT = false;
+	private boolean collideRIGHT = false;
+	private boolean collideUP = false;
+	private boolean collideDOWN = false;
+	
 	private Integer[] playerCoords = new Integer[2];
 	
-	private int speedX = 1;
-	private int speedY = 1;
+	private int speedX = 10;
+	private int speedY = 10;
 	
-	public PlayerController(){
-		playerCoords[0] = 0;
-		playerCoords[1] = 0;
-	}
-	public void Update() {
+	public void Update(double dt) {
 		movePlayer();
+		collideLEFT = false;
+		collideRIGHT = false;
+		collideUP = false;
+		collideDOWN = false;
+		//System.out.println("Coords:"+lc.getWorldCoords()[1]);
 	}
 	
-	private void movePlayer() {
-		int pcX = playerCoords[0] + (speedX  * playerMoveX *-1);
-		int pcY = playerCoords[1] + (speedY  * playerMoveY) *-1;	
-		playerCoords[0] = pcX;
-		playerCoords[1] = pcY;
+	private void movePlayer() { //moves the offset for everything in the world, avoids a follow 'camera'
+		//System.out.println(playerMoveX);
+		if(collideLEFT && playerMoveX > 0) {
+			//System.out.println("Collision stopping left");
+			playerMoveX = 0;
+		}
+		if(collideRIGHT && playerMoveX < 0) {
+			//System.out.println("Collision stopping right");
+			playerMoveX = 0;
+		}
+		if(collideUP && playerMoveY > 0) {
+			playerMoveY = 0;
+		}
+		if(collideDOWN && playerMoveY < 0) {
+			playerMoveY = 0;
+		}
+		int pcX = lc.getWorldX() + (speedX * playerMoveX);
+		int pcY = lc.getWorldY() + (speedY * playerMoveY);	
+		lc.setWorldX(pcX);
+		lc.setWorldY(pcY);
+		lc.updatePositions();
+	}
+	
+	public void stopPlayer() {
+		if(kbPressedUP) {
+			collideUP = true;
+			System.out.println("COLLIDE UP");
+		}
+		if(kbPressedDOWN) {
+			collideDOWN = true;
+			System.out.println("COLLIDE DOWN");
+		}
+		if(kbPressedLEFT) {
+			collideLEFT = true;
+			System.out.println("COLLIDE LEFT");
+		}
+		if(kbPressedRIGHT) {
+			collideRIGHT = true;
+			System.out.println("COLLIDE RIGHT");
+		}
+		/*
+		double gridPosX = gridPos[0] % 1;
+		double gridPosY = gridPos[1] % 1;
+
+    	System.out.println(gridPosX + " : " + gridPosY);
+    	if(gridPosX <= 1 && gridPosX >= 0.85) {
+    		System.out.println("Block is LEFT");
+    		collideLEFT = true;
+    	}
+    	else if(gridPosX >= -0.9 && gridPosX <= -0.85) {
+    		System.out.println("Block is RIGHT");
+    		collideRIGHT = true;
+    	}
+    	if(gridPosY <= 1 && gridPosY >= 0.85) {
+    		System.out.println("Block is DOWN");
+    		collideDOWN = true;
+    	}
+    	else if(gridPosY >= -0.9 && gridPosY <= -0.85) {
+    		System.out.println("Block is UP");
+    		collideUP = true;
+    	}
+    	*/
+		
 	}
 	
 	public void resetPC(){
@@ -122,5 +203,13 @@ public class PlayerController {
 
 	public void setPlayerCoords(Integer[] playerCoords) {
 		this.playerCoords = playerCoords;
+	}
+
+	public Player getPlayer() {
+		return player;
+	}
+
+	public void setPlayer(Player player) {
+		this.player = player;
 	}
 }

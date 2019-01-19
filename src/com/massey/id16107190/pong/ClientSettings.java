@@ -6,8 +6,8 @@ import java.awt.event.KeyEvent;
 public final class ClientSettings{
 	 
     private static ClientSettings INSTANCE;
-	private int resX = 600;
-	private int resY = 600;
+	private int resX = 1920;
+	private int resY = 1080;
 	private int fps = 60;
 	
 	private int pu = KeyEvent.VK_W;
